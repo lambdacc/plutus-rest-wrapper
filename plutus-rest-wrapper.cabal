@@ -1,5 +1,5 @@
 cabal-version:      3.0
-name:               plutus-starter
+name:               plutus-rest-wrapper
 version:            0.1.0.0
 
 -- A short (one-line) description of the package.
@@ -41,22 +41,34 @@ common lang
 library
     import: lang
     exposed-modules:
-      MyModule
-      Plutus.Contracts.Game
+      Sample.Contracts.Escrow,
+      Sample.Contracts.Trace
     build-depends:
       base >= 4.9 && < 5,
       aeson -any,
+      aeson-pretty -any,
       bytestring -any,
       containers -any,
+      cardano-api -any,
+      cardano-crypto-class -any,
+      cardano-ledger-core -any,
+      either-unwrap -any,
       freer-extras -any,
+      openapi3 -any,
       playground-common -any,
       plutus-contract -any,
       plutus-ledger -any,
       plutus-ledger-api -any,
       plutus-ledger-constraints -any,
+      plutus-pab -any,
       plutus-tx -any,
       plutus-tx-plugin -any,
       plutus-script-utils -any,
+      process -any,
+      serialise -any,
+      tasty -any,
+      tasty-hunit -any,
+      text -any,
       text -any,
       lens -any,
     hs-source-dirs: src examples/src
@@ -74,7 +86,7 @@ test-suite plutus-example-projects-test
     plutus-contract -any,
     plutus-pab -any,
     plutus-ledger -any,
-    plutus-starter -any
+    plutus-rest-wrapper -any
   build-depends:
     base >=4.9 && <5,
     tasty -any,
@@ -83,7 +95,7 @@ test-suite plutus-example-projects-test
     tasty-hedgehog >=0.2.0.0
 
 
-executable plutus-starter-pab
+executable plutus-rest-wrapper-pab
   import: lang
   main-is: Main.hs
   hs-source-dirs: pab
@@ -94,7 +106,7 @@ executable plutus-starter-pab
     data-default -any,
     plutus-contract -any,
     plutus-pab -any,
-    plutus-starter -any,
+    plutus-rest-wrapper -any,
     aeson -any,
     freer-simple -any,
     prettyprinter -any,
