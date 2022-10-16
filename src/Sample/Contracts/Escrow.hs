@@ -40,7 +40,7 @@ import Plutus.Contract
 import Plutus.Contract (adjustUnbalancedTx)
 import Plutus.Contract.Request as Request
 import Plutus.Contract.Wallet (getUnspentOutput)
-import Plutus.Rest.Utils (tryReadAddress)
+import Plutus.Rest.Utils (tryReadAddress, selectDatum)
 import Plutus.Script.Utils.V1.Scripts qualified as Scripts
 import Plutus.V1.Ledger.Scripts
 import Plutus.V1.Ledger.Value (flattenValue)
@@ -106,17 +106,13 @@ mkValidator EscrowParams{buyer, seller, lovelaceAmt,finaliseTime,endTime} d r ct
         dat -> True
         _ -> False
 
-{-# INLINEABLE selectDatum #-}
-selectDatum :: TxInfo -> TxOut -> EscrowDatum
-selectDatum info txOut = case txOutDatumHash txOut of
-  Nothing -> traceError "No txOutDatumHash"
-  Just dhash ->
-    case findDatum dhash info of
-      Nothing -> traceError "Datum is not found from hash"
-      Just (Datum d) ->
-        case PlutusTx.fromBuiltinData d of
-          Nothing -> traceError "Datum value is empty!"
-          Just p -> p
+{-# INLINEABLE parseDatumValue #-}
+parseDatumValue :: TxInfo -> TxOut -> EscrowDatum
+parseDatumValue info txOut = do
+  let (Datum d) = selectDatum info txOut in
+   case PlutusTx.fromBuiltinData d of
+    Nothing -> traceError "Datum value is empty!"
+    Just p -> p
 
 
 data Escrow
