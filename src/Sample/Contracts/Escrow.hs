@@ -4,6 +4,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ImportQualifiedPost #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
@@ -55,7 +56,7 @@ import qualified Prelude
 import Sample.Contracts.Types
 import Text.Printf (printf)
 
-data EscrowDatum = Party PaymentPubKeyHash | DatumNone
+data EscrowDatum = Party PaymentPubKeyHash
                       deriving (Show)
 
 data EscrowRedeemer = Lock | Cancel | Collect
@@ -68,16 +69,46 @@ lovelaceToAda :: Integer -> Integer
 lovelaceToAda i = (fromIntegral i) `div` 1000000
 
 PlutusTx.makeLift ''EscrowParams
-PlutusTx.makeIsDataIndexed ''EscrowDatum [('Party, 0),('DatumNone, 1)]
-PlutusTx.makeIsDataIndexed ''EscrowRedeemer [('Lock, 0),('Cancel, 1),('Collect, 1)]
+PlutusTx.makeIsDataIndexed ''EscrowDatum [('Party, 0)]
+PlutusTx.makeIsDataIndexed ''EscrowRedeemer [('Lock, 0),('Cancel, 1),('Collect, 2)]
 
 {-# INLINEABLE mkValidator #-}
 mkValidator :: EscrowParams -> EscrowDatum -> EscrowRedeemer -> ScriptContext -> Bool
-mkValidator p d r ctx = True
+mkValidator EscrowParams{buyer, seller, lovelaceAmt,finaliseTime,endTime} d r ctx =
+  (traceIfFalse "Missing valid signature" $ validSignature buyer seller r) &&
+  (traceIfFalse "Invalid inputs" $ validInputs buyer d r)
+  where
+    info :: TxInfo
+    info = scriptContextTxInfo ctx
 
-{-# INLINEABLE findDatumValue #-}
-findDatumValue :: TxInfo -> TxOut -> EscrowDatum
-findDatumValue info txOut = case txOutDatumHash txOut of
+    validSignature :: PaymentPubKeyHash -> PaymentPubKeyHash -> EscrowRedeemer -> Bool
+    validSignature buyer seller r =
+      case r of
+        Cancel -> txSignedBy info (unPaymentPubKeyHash buyer)
+        Collect -> txSignedBy info (unPaymentPubKeyHash seller)
+        _ -> traceError "Invalid redeemer"
+
+    validInputs buyer (Party pkh) r =
+      case r of
+        Cancel -> (pkh == buyer) && (allSatisfyOwnUtxos (Party buyer))
+        _ -> True
+
+    allSatisfyOwnUtxos :: EscrowDatum -> Bool
+    allSatisfyOwnUtxos dat =
+      and $
+        map (satisfyDatum dat) $
+          filter (isJust . toValidatorHash . txOutAddress) (txInInfoResolved <$> txInfoInputs info)
+
+    satisfyDatum :: EscrowDatum -> TxOut -> Bool
+    satisfyDatum dat txOut = case txOutDatumHash txOut of
+      Nothing -> False
+      _ -> case selectDatum info txOut of
+        dat -> True
+        _ -> False
+
+{-# INLINEABLE selectDatum #-}
+selectDatum :: TxInfo -> TxOut -> EscrowDatum
+selectDatum info txOut = case txOutDatumHash txOut of
   Nothing -> traceError "No txOutDatumHash"
   Just dhash ->
     case findDatum dhash info of
@@ -100,20 +131,11 @@ typedValidator = Scripts.mkTypedValidatorParam @Escrow
   where
     wrap = Scripts.mkUntypedValidator
 
-{-typedValidator :: EscrowParams -> Scripts.TypedValidator Escrow
-typedValidator p =
-  Scripts.mkTypedValidatorParam @Escrow
-    ($$(PlutusTx.compile [||mkValidator||]) `PlutusTx.applyCode` PlutusTx.liftCode p)
-    $$(PlutusTx.compile [||wrap||])
-  where
-    wrap = Scripts.wrapValidator @EscrowDatum @()-}
-
 validator :: EscrowParams -> Scripts.Validator
 validator = Scripts.validatorScript . typedValidator
 
 scrAddress :: EscrowParams -> Ledger.Address
 scrAddress = scriptAddress . validator
-
 
 type EscrowSchema =
   Endpoint "lock" EscrowParams
@@ -140,16 +162,17 @@ adjustAndSubmitWith :: ( PlutusTx.FromData (Scripts.DatumType a)
                     -> Contract w s e CardanoTx
 adjustAndSubmitWith lookups constraints = do
     utx <- (mkTxConstraints lookups constraints) >>= adjustUnbalancedTx
-    logDebug @String $ printf "unbalancedTx: %s" $ show utx
+    --logDebug @String $ printf "unbalancedTx: %s" $ show utx
     unsigned <- balanceTx utx
-    logDebug @String $ printf "balanced: %s" $ show unsigned
+    --logDebug @String $ printf "balanced: %s" $ show unsigned
     signed <- submitBalancedTx unsigned
-    logDebug @String $ printf "signed: %s" $ show signed
+    --logDebug @String $ printf "signed: %s" $ show signed
     return signed
 
 lock :: EscrowParams -> Contract w s Text ()
 lock ep = do
   pkh <- Request.ownFirstPaymentPubKeyHash
+  logInfo @String $ "Wallet pkh : " <> show pkh
   let dat = Party pkh
       tx = mustPayToTheScript dat $ Ada.lovelaceValueOf (lovelaceAmt ep)
   txM <- adjustAndSubmitWith @Escrow (typedValidatorLookups (typedValidator ep)) tx
@@ -162,32 +185,38 @@ lock ep = do
 collect :: EscrowParams -> Contract w s Text ()
 collect ep = do
   pkh <- Request.ownFirstPaymentPubKeyHash
+  logInfo @String $ "Wallet pkh : " <> show pkh
   logInfo @String $ "Collecting funds from contract : " <> show ep
   utxos <- utxosAt $ scrAddress ep
-  logInfo @String $ printf "%s" (show utxos)
+  --logInfo @String $ printf "%s" (show utxos)
   logInfo @String $ "Script address is" <> show (serialiseAddress $ fromRight (toCardanoAddressInEra (Mainnet) $ scrAddress ep))
+  os <- utxosAt (scrAddress ep)
+  let totalVal = mconcat [view ciTxOutValue o | o <- map snd (Map.toList os)]
+      datums = [datumContent o | o <- map snd (Map.toList os)]
+  logInfo @String $ "Total Value at script: " <> show totalVal
+  logInfo @String $ "Datums at script: " <> show datums
   if Map.null utxos
     then logInfo @String $ "No funds at the contract."
     else do
-    let tx =
-            collectFromScript utxos Lock
-            <> mustBeSignedBy pkh
+    let tx = collectFromScript utxos Collect
+             <> mustBeSignedBy pkh
     txM <- submitTxConstraintsSpending (typedValidator ep) utxos tx
-    logInfo @String $ "Funds collected."
+    logInfo @String $ "Executed Collect."
 
 cancel :: EscrowParams -> Contract w s Text ()
 cancel ep = do
   pkh <- Request.ownFirstPaymentPubKeyHash
+  logInfo @String $ "Wallet pkh : " <> show pkh
   let dat = Party pkh
   os <- utxosAt (scrAddress ep)
   let totalVal = mconcat [view ciTxOutValue o | o <- map snd (Map.toList os)]
       datums = [datumContent o | o <- map snd (Map.toList os)]
   logInfo @String $ "Total Value at script: " <> show totalVal
-  logInfo @String $ "Datums at at script: " <> show datums
+  logInfo @String $ "Datums at script: " <> show datums
   let ownUtxoFilter _ ciTxOut = either id Scripts.datumHash (_ciTxOutDatum ciTxOut) == Scripts.datumHash (Datum (PlutusTx.toBuiltinData dat))
       tx = collectFromScriptFilter ownUtxoFilter os Cancel
             <> mustIncludeDatum (Datum $ PlutusTx.toBuiltinData dat)
-            <> mustBeSignedBy pkh
+            <> mustBeSignedBy (buyer ep)
       lps = typedValidatorLookups (typedValidator ep)
             <> Ledger.Constraints.unspentOutputs (ownUtxo ownUtxoFilter os)
   txM <- adjustAndSubmitWith @Escrow lps tx

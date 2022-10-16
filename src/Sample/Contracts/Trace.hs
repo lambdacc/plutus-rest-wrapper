@@ -8,7 +8,7 @@
 {-# LANGUAGE TypeApplications      #-}
 {-# LANGUAGE TypeFamilies          #-}
 
-module  Sample.Contracts.Trace where
+module Sample.Contracts.Trace where
 
 import           Control.Monad              hiding (fmap)
 import           Control.Monad.Freer.Extras                   as Extras
@@ -31,6 +31,12 @@ testContractCollect = runEmulatorTraceIO contractCollectTrace
 testContractCancel :: IO ()
 testContractCancel = runEmulatorTraceIO contractCancelTrace
 
+testContractCollectBeforeEndTime :: IO ()
+testContractCollectBeforeEndTime = runEmulatorTraceIO contractCollectTraceBeforeEndTime
+
+testContractCancelAfterFinaliseTime :: IO ()
+testContractCancelAfterFinaliseTime = runEmulatorTraceIO contractCancelTraceAfterFinaliseTime
+
 buyerW, sellerW :: Wallet
 buyerW = X.knownWallet 1
 sellerW  = X.knownWallet 2
@@ -50,7 +56,7 @@ contractCollectTrace = do
     h2 <- activateContractWallet sellerW endpoints
 
     let amt = 90000000
-        escrow = escrowParams amt (POSIXTime 0) (POSIXTime 10000)
+        escrow = escrowParams amt (POSIXTime 5) (POSIXTime 10000)
     callEndpoint @"lock" h1 escrow
     void $ Emulator.waitNSlots 11
     callEndpoint @"collect" h2 escrow
@@ -62,9 +68,35 @@ contractCancelTrace = do
     h2 <- activateContractWallet sellerW endpoints
 
     let amt = 90000000
-        escrow = escrowParams amt (POSIXTime 0) (POSIXTime 10000)
+        escrow = escrowParams amt (POSIXTime 5) (POSIXTime 10000)
     callEndpoint @"lock" h1 escrow
-    void $ Emulator.waitNSlots 11
-    callEndpoint @"collect" h2 escrow
+    void $ Emulator.waitNSlots 5
+    callEndpoint @"cancel" h1 escrow
     void $ Emulator.waitNSlots 2
+
+contractCollectTraceBeforeEndTime  :: EmulatorTrace ()
+contractCollectTraceBeforeEndTime = do
+    h1 <- activateContractWallet buyerW endpoints
+    h2 <- activateContractWallet sellerW endpoints
+
+    let amt = 90000000
+        escrow = escrowParams amt (POSIXTime 5) (POSIXTime 10000)
+    callEndpoint @"lock" h1 escrow
+    void $ Emulator.waitNSlots 8
+    callEndpoint @"collect" h2 escrow
+    void $ Emulator.waitNSlots 1
+
+contractCancelTraceAfterFinaliseTime  :: EmulatorTrace ()
+contractCancelTraceAfterFinaliseTime = do
+    h1 <- activateContractWallet buyerW endpoints
+    h2 <- activateContractWallet sellerW endpoints
+
+    let amt = 90000000
+        escrow = escrowParams amt (POSIXTime 5) (POSIXTime 10000)
+    callEndpoint @"lock" h1 escrow
+    void $ Emulator.waitNSlots 6
+    callEndpoint @"cancel" h1 escrow
+    void $ Emulator.waitNSlots 2
+
+
 
