@@ -42,7 +42,9 @@ library
     import: lang
     exposed-modules:
       Sample.Contracts.Escrow,
-      Sample.Contracts.Trace
+      Sample.Contracts.Trace,
+      Sample.Contracts.Types,
+      Plutus.Rest.Utils
     build-depends:
       base >= 4.9 && < 5,
       aeson -any,
@@ -71,7 +73,7 @@ library
       text -any,
       text -any,
       lens -any,
-    hs-source-dirs: src examples/src
+    hs-source-dirs: src
 
 test-suite plutus-example-projects-test
   import: lang
@@ -113,3 +115,33 @@ executable plutus-rest-wrapper-pab
     freer-extras -any,
     plutus-ledger -any,
     openapi3 -any,
+
+executable attribute-server
+  main-is: attribute-server.hs
+  hs-source-dirs:      app
+  ghc-options:         -Wall
+  build-depends:       base ^>= 4.14.1.0
+                     , aeson
+                     , attoparsec
+                     , base-compat
+                     , blaze-html
+                     , blaze-markup
+                     , bytestring
+                     , cardano-api
+                     , cardano-addresses
+                     , directory
+                     , either-unwrap
+                     , http-media
+                     , lucid
+                     , mtl
+                     , plutus-ledger
+                     , plutus-ledger-api
+                     , plutus-rest-wrapper
+                     , plutus-tx
+                     , servant
+                     , servant-server
+                     , string-conversions
+                     , text
+                     , time
+                     , wai
+                     , warp
