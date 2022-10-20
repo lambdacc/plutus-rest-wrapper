@@ -19,5 +19,5 @@ A convenient way to bridge the frontend/backend for DApps with off-chain Plutus.
 What is listed above is not an exhaustive set of use cases for getting attributes from the off-chain code. However they go a long way to simplify the frontend-backend-Plutus interaction for a dApp.
 
 
-To call out a related case, there are differences in the way data serialization is done by different tools like cardano-cli, serialization libs and Plutus. Unless identical serialized bytes are used the corresponding hashes turn out to be different. This leaves an inconsistency across toolsets and can become inconvenient to dApps that use more than one of the tools in their tech stack. This RESTful abstraction will make it easier to employ Plutus Application Backend (PAB) running Plutus smart contracts in the dApp stack. 
+To call out a related case, there are differences in the way data serialization is done by different tools like cardano-cli, serialization libs and Plutus. Unless identical serialized bytes are used the corresponding hashes turn out to be different. This leaves an inconsistency across toolsets and can become inconvenient to dApps that use more than one of the tools in their tech stack. This RESTful abstraction will make it easier to employ Plutus APlutus smart contracts on the backend in the dApp stack. 
 
