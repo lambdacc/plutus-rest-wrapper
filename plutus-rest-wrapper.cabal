@@ -44,18 +44,30 @@ library
       Sample.Contracts.Escrow,
       Sample.Contracts.Trace,
       Sample.Contracts.Types,
-      Plutus.Rest.Utils
+      Sample.Runtime,
+      Plutus.Rest.Utils,
+      AttributeServer
     build-depends:
       base >= 4.9 && < 5,
       aeson -any,
       aeson-pretty -any,
+      attoparsec -any,
+      base-compat -any,
+      blaze-html -any,
+      blaze-markup -any,
       bytestring -any,
       containers -any,
+      cardano-addresses -any,
       cardano-api -any,
       cardano-crypto-class -any,
       cardano-ledger-core -any,
+      directory -any,
       either-unwrap -any,
       freer-extras -any,
+      http-media -any,
+      lens -any,
+      lucid -any,
+      mtl -any,
       openapi3 -any,
       playground-common -any,
       plutus-contract -any,
@@ -68,12 +80,17 @@ library
       plutus-script-utils -any,
       process -any,
       serialise -any,
+      servant -any,
+      servant-server -any,
+      string-conversions -any,
       tasty -any,
       tasty-hunit -any,
       text -any,
       text -any,
-      lens -any,
-    hs-source-dirs: src
+      time -any,
+      wai -any,
+      warp -any,
+    hs-source-dirs: src, app
 
 test-suite plutus-example-projects-test
   import: lang
@@ -117,7 +134,7 @@ executable plutus-rest-wrapper-pab
     openapi3 -any,
 
 executable attribute-server
-  main-is: attribute-server.hs
+  main-is: server-main.hs
   hs-source-dirs:      app
   ghc-options:         -Wall
   build-depends:       base ^>= 4.14.1.0

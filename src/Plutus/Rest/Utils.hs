@@ -105,3 +105,6 @@ selectDatum info txOut = case Plutus.txOutDatumHash txOut of
     case Plutus.findDatum dhash info of
       Nothing -> traceError "Datum is not found from hash"
       Just dat -> dat
+
+addrToPaymentPubKeyHash :: String -> Plutus.PaymentPubKeyHash
+addrToPaymentPubKeyHash addr = unsafePaymentPubKeyHash $ unsafeReadAddress addr
