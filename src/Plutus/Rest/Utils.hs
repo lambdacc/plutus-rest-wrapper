@@ -1,4 +1,6 @@
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE FlexibleContexts   #-}
+{-# LANGUAGE ImportQualifiedPost #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Plutus.Rest.Utils where
@@ -37,6 +39,38 @@ import           Wallet.Emulator.Wallet      (WalletId (..), Wallet (..))
 import           Wallet.Types                (ContractInstanceId (..))
 import           System.Process
 import           GHC.IO.Handle.Text
+import Sample.Contracts.Types
+import Text.Printf (printf)
+import qualified Ledger.Typed.Scripts as Scripts hiding (validatorHash)
+import Ledger.Constraints hiding (adjustUnbalancedTx)
+import Plutus.Contract
+
+adjustAndSubmit :: ( PlutusTx.FromData (Scripts.DatumType a)
+                   , PlutusTx.ToData (Scripts.RedeemerType a)
+                   , PlutusTx.ToData (Scripts.DatumType a)
+                   , AsContractError e
+                   )
+                => Scripts.TypedValidator a
+                -> TxConstraints (Scripts.RedeemerType a) (Scripts.DatumType a)
+                -> Contract w s e Ledger.CardanoTx
+adjustAndSubmit inst = adjustAndSubmitWith $ typedValidatorLookups inst
+
+adjustAndSubmitWith :: ( PlutusTx.FromData (Scripts.DatumType a)
+                       , PlutusTx.ToData (Scripts.RedeemerType a)
+                       , PlutusTx.ToData (Scripts.DatumType a)
+                       , AsContractError e
+                       )
+                    => ScriptLookups a
+                    -> TxConstraints (Scripts.RedeemerType a) (Scripts.DatumType a)
+                    -> Contract w s e Ledger.CardanoTx
+adjustAndSubmitWith lookups constraints = do
+    utx <- (mkTxConstraints lookups constraints) >>= adjustUnbalancedTx
+    --logDebug @String $ printf "unbalancedTx: %s" $ show utx
+    unsigned <- balanceTx utx
+    --logDebug @String $ printf "balanced: %s" $ show unsigned
+    signed <- submitBalancedTx unsigned
+    --logDebug @String $ printf "signed: %s" $ show signed
+    return signed
 
 dataToScriptData :: Data -> ScriptData
 dataToScriptData (Constr n xs) = ScriptDataConstructor n $ dataToScriptData <$> xs
