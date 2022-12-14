@@ -33,3 +33,16 @@ data EscrowParams = EscrowParams
   , endTime :: POSIXTime -- the time after which the funds can be claimed by seller
   }
   deriving (Eq, Ord, Prelude.Eq, Prelude.Ord, Show, Generic, ToJSON, FromJSON, ToSchema, OpenApi.ToSchema)
+
+data MintingPolicyParam = MintingPolicyParam
+  { issuer :: PaymentPubKeyHash -- the issuer of the token
+  , tName :: TokenName -- name of the token minted
+  , randomiser :: Integer -- used to randomise the policyId of the minted token
+  } deriving (Show)
+
+data MintParams = MintParams
+                        { tn :: String
+                        , amt :: !Integer
+                        , clientPkh :: !PaymentPubKeyHash
+                        }
+    deriving (Eq, Ord, Prelude.Eq, Prelude.Ord, Show, Generic, FromJSON,  ToJSON, ToSchema, OpenApi.ToSchema)
