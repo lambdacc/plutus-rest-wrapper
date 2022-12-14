@@ -40,7 +40,7 @@ import Plutus.Contract
 import Plutus.Contract (adjustUnbalancedTx)
 import Plutus.Contract.Request as Request
 import Plutus.Contract.Wallet (getUnspentOutput)
-import Plutus.Rest.Utils (tryReadAddress, selectDatum)
+import Plutus.Rest.Utils (tryReadAddress, selectDatum, adjustAndSubmit, adjustAndSubmitWith)
 import Plutus.Script.Utils.V1.Scripts qualified as Scripts
 import Plutus.V1.Ledger.Scripts
 import Plutus.V1.Ledger.Value (flattenValue)
@@ -133,37 +133,13 @@ validator = Scripts.validatorScript . typedValidator
 scrAddress :: EscrowParams -> Ledger.Address
 scrAddress = scriptAddress . validator
 
+contractDatum :: PaymentPubKeyHash -> Datum
+contractDatum pkh =  Datum (PlutusTx.toBuiltinData $ Party pkh)
+
 type EscrowSchema =
   Endpoint "lock" EscrowParams
     .\/ Endpoint "cancel" EscrowParams
     .\/ Endpoint "collect" EscrowParams
-
-adjustAndSubmit :: ( PlutusTx.FromData (Scripts.DatumType a)
-                   , PlutusTx.ToData (Scripts.RedeemerType a)
-                   , PlutusTx.ToData (Scripts.DatumType a)
-                   , AsContractError e
-                   )
-                => Scripts.TypedValidator a
-                -> TxConstraints (Scripts.RedeemerType a) (Scripts.DatumType a)
-                -> Contract w s e CardanoTx
-adjustAndSubmit inst = adjustAndSubmitWith $ typedValidatorLookups inst
-
-adjustAndSubmitWith :: ( PlutusTx.FromData (Scripts.DatumType a)
-                       , PlutusTx.ToData (Scripts.RedeemerType a)
-                       , PlutusTx.ToData (Scripts.DatumType a)
-                       , AsContractError e
-                       )
-                    => ScriptLookups a
-                    -> TxConstraints (Scripts.RedeemerType a) (Scripts.DatumType a)
-                    -> Contract w s e CardanoTx
-adjustAndSubmitWith lookups constraints = do
-    utx <- (mkTxConstraints lookups constraints) >>= adjustUnbalancedTx
-    --logDebug @String $ printf "unbalancedTx: %s" $ show utx
-    unsigned <- balanceTx utx
-    --logDebug @String $ printf "balanced: %s" $ show unsigned
-    signed <- submitBalancedTx unsigned
-    --logDebug @String $ printf "signed: %s" $ show signed
-    return signed
 
 lock :: EscrowParams -> Contract w s Text ()
 lock ep = do
