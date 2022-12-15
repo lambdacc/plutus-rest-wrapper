@@ -37,7 +37,6 @@ data EscrowParams = EscrowParams
 data MintingPolicyParam = MintingPolicyParam
   { issuer :: PaymentPubKeyHash -- the issuer of the token
   , tName :: TokenName -- name of the token minted
-  , randomiser :: Integer -- used to randomise the policyId of the minted token
   } deriving (Show)
 
 data MintParams = MintParams

@@ -69,7 +69,7 @@ data ScriptAddr = ScriptAddr {bech32Address :: Text}
                     deriving (Eq, Show, Generic, ToJSON)
 
 data MintPolicyId = MintPolicyId {policyId :: String}
-                    deriving (Eq, Show, Generic, ToJSON)
+                    deriving (Eq, Show, Generic, FromJSON, ToJSON)
 
 data ContractDatumHash = ContractDatumHash {datumHash :: PV1.DatumHash}
                     deriving (Eq, Show, Generic, ToJSON)

@@ -44,7 +44,8 @@ library
       Sample.Contracts.Types,
       Sample.Runtime,
       Plutus.Rest.Utils,
-      AttributeServer
+      AttributeServer,
+      ProjectPAB
     build-depends:
       base >= 4.9 && < 5,
       aeson -any,
@@ -59,9 +60,11 @@ library
       cardano-api -any,
       cardano-crypto-class -any,
       cardano-ledger-core -any,
+      data-default -any,
       directory -any,
       either-unwrap -any,
       freer-extras -any,
+      freer-simple -any,
       http-media -any,
       lens -any,
       lucid -any,
@@ -76,6 +79,7 @@ library
       plutus-tx -any,
       plutus-tx-plugin -any,
       plutus-script-utils -any,
+      prettyprinter -any,
       process -any,
       serialise -any,
       servant -any,
@@ -114,8 +118,8 @@ test-suite plutus-example-projects-test
 
 executable plutus-rest-wrapper-pab
   import: lang
-  main-is: Main.hs
-  hs-source-dirs: pab
+  main-is: pab.hs
+  hs-source-dirs: app
   ghc-options:
     -threaded
   build-depends:
@@ -129,7 +133,7 @@ executable plutus-rest-wrapper-pab
     prettyprinter -any,
     freer-extras -any,
     plutus-ledger -any,
-    openapi3 -any,
+    openapi3 -any
 
 executable attribute-server
   main-is: server-main.hs
