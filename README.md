@@ -9,10 +9,10 @@ A convenient way to bridge the frontend/backend for DApps with off-chain Plutus.
 
 <ul>
 <li>:heavy_check_mark: Plutus pub key hash for a given bech32 address</li>
-<li>- [ ]  Serialized datum</li>
-<li>- [ ]  Datum hash as encoded by Plutus</li>
 <li>:heavy_check_mark: Parameterized script address</li>
 <li>:heavy_check_mark: CBOR encoded script generated with Plutus</li>
+<li>:heavy_check_mark: Datum hash as encoded by Plutus</li>
+<li>- [ ] Serialized datum</li>
 </ul>
 
 What is listed above is not an exhaustive set of use cases for getting attributes from the off-chain code. However, they go a long way to simplify the frontend-backend-Plutus interaction for a dApp.
