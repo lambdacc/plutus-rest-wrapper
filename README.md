@@ -13,6 +13,7 @@ A convenient way to bridge the frontend/backend for DApps with off-chain Plutus.
 <li>:heavy_check_mark: CBOR encoded script generated with Plutus</li>
 <li>:heavy_check_mark: Datum hash as encoded by Plutus</li>
 <li>:heavy_check_mark: Serialized datum</li>
+<li>:heavy_check_mark: Policy id / currency symbol for minting contracts</li>
 </ul>
 
 What is listed above is not an exhaustive set of use cases for getting attributes from the off-chain code. However, they go a long way to simplify the frontend-backend-Plutus interaction for a dApp.
