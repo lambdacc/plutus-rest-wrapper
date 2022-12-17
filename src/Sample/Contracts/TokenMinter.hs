@@ -26,7 +26,7 @@ import Control.Lens (view)
 import Control.Monad hiding (fmap)
 import Data.Maybe (fromJust)
 import Data.Aeson
-import Data.Aeson (FromJSON, ToJSON, Object(..), encode)
+import Data.Aeson (FromJSON, ToJSON, encode)
 import Data.ByteString.Lazy.Char8 (unpack)
 import qualified Data.Map as Map hiding (filter)
 import qualified Data.Maybe as DM (fromJust)
@@ -107,7 +107,7 @@ mintToken :: MintParams -> Contract w s Text ()
 mintToken rp = do
   oref <- getUnspentOutput
   o <- fromJust <$> Contract.txOutFromRef oref
-  ownPkh <- Request.ownPaymentPubKeyHash
+  ownPkh <- Request.ownFirstPaymentPubKeyHash
   let mp = toMintingPolicyParams ownPkh (tn rp)
       val = Value.singleton (curSymbol mp) (tName mp) (amt rp)
       lookups     = Constraints.mintingPolicy (mintPolicy mp) <>

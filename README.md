@@ -129,7 +129,7 @@ cabal build attribute-server
 ```
 
 
-**6. Get policy id for token minting contract**
+**6. Get policy id for a parametrised token minting contract**
 ```
     curl -X 'POST' \
           'http://localhost:9033/policy-id' \

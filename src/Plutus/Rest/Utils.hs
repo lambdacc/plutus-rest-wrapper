@@ -17,11 +17,8 @@ import           Data.Aeson            (decode, encode)
 import           Data.Aeson.Encode.Pretty
                    (Config (..), encodePretty', defConfig, keyOrder)
 import           Data.Aeson.Text       (encodeToLazyText)
-import qualified Data.ByteString.Lazy  as LBS
-import qualified Data.ByteString.Short as SBS
-import qualified Data.Text.Lazy.IO   as LT
-import           Data.Text                   (pack, Text)
-import           Data.Maybe                  (fromJust, fromMaybe)
+import           Data.Text                   (pack)
+import           Data.Maybe                  (fromMaybe)
 import qualified Ledger
 import qualified Ledger as Plutus
 import           Ledger.Value                as Value
