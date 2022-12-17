@@ -3,23 +3,19 @@ name:               plutus-rest-wrapper
 version:            0.1.0.0
 
 -- A short (one-line) description of the package.
--- synopsis:
+synopsis: RESTful wrapper for Plutus offchain
 
 -- A longer description of the package.
--- description:
+description: This package is offers a convenient way to bridge the frontend/backend for DApps with their off-chain Plutus code. The RESTful API can be used to fetch to attributes deduced with Plutus at runtime.
 
 -- A URL where users can report bugs.
--- bug-reports:
+bug-reports: https://github.com/lambdacc/plutus-rest-wrapper
 
 license: Apache-2.0
 license-files: LICENSE
-author:             Your name
-maintainer:         Your email
+author:             lambdacc
+maintainer:         https://github.com/lambdacc
 
--- A copyright notice.
--- copyright:
--- category:
--- extra-source-files: CHANGELOG.md
 
 flag defer-plugin-errors
     description:
@@ -42,11 +38,14 @@ library
     import: lang
     exposed-modules:
       Sample.Contracts.Escrow,
-      Sample.Contracts.Trace,
+      Sample.Contracts.EscrowTrace,
+      Sample.Contracts.TokenMinter,
+      Sample.Contracts.TokenMinterTrace,
       Sample.Contracts.Types,
       Sample.Runtime,
       Plutus.Rest.Utils,
-      AttributeServer
+      AttributeServer,
+      ProjectPAB
     build-depends:
       base >= 4.9 && < 5,
       aeson -any,
@@ -61,9 +60,11 @@ library
       cardano-api -any,
       cardano-crypto-class -any,
       cardano-ledger-core -any,
+      data-default -any,
       directory -any,
       either-unwrap -any,
       freer-extras -any,
+      freer-simple -any,
       http-media -any,
       lens -any,
       lucid -any,
@@ -78,6 +79,7 @@ library
       plutus-tx -any,
       plutus-tx-plugin -any,
       plutus-script-utils -any,
+      prettyprinter -any,
       process -any,
       serialise -any,
       servant -any,
@@ -90,6 +92,7 @@ library
       time -any,
       wai -any,
       warp -any,
+      utf8-string -any
     hs-source-dirs: src, app
 
 test-suite plutus-example-projects-test
@@ -113,11 +116,10 @@ test-suite plutus-example-projects-test
     text -any,
     tasty-hedgehog >=0.2.0.0
 
-
 executable plutus-rest-wrapper-pab
   import: lang
-  main-is: Main.hs
-  hs-source-dirs: pab
+  main-is: pab.hs
+  hs-source-dirs: app
   ghc-options:
     -threaded
   build-depends:
@@ -131,7 +133,7 @@ executable plutus-rest-wrapper-pab
     prettyprinter -any,
     freer-extras -any,
     plutus-ledger -any,
-    openapi3 -any,
+    openapi3 -any
 
 executable attribute-server
   main-is: server-main.hs

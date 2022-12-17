@@ -8,7 +8,7 @@
 {-# LANGUAGE TypeApplications      #-}
 {-# LANGUAGE TypeFamilies          #-}
 
-module Sample.Contracts.Trace where
+module Sample.Contracts.EscrowTrace where
 
 import           Control.Monad              hiding (fmap)
 import           Control.Monad.Freer.Extras                   as Extras
