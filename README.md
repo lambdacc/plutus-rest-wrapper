@@ -23,7 +23,8 @@ What is listed above is not an exhaustive set of use cases for getting attribute
 
 To call out a related case, there are differences in the way data serialization is done by different tools like cardano-cli, serialization libs and Plutus. Unless identical serialized bytes are used the corresponding hashes turn out to be different. This leaves an inconsistency across toolsets and can become inconvenient to dApps that use more than one of the tools in their tech stack. This RESTful abstraction will make it easier to employ Plutus smart contracts on the backend in the dApp stack. Further when you use parametrisation, the resulting script addresses and policy ids vary with the parameters at runtime. Using the endpoints those parametrised values can be fetched.  
 
-Diagram for the interactions:
+Diagram for the interaction:
+![rest-wrapper_aciw2e](https://user-images.githubusercontent.com/5955141/208247751-44bb829c-3300-40b6-9f18-4e447ba8aad2.jpg)
 
 ## How to use the REST wrapper
 
