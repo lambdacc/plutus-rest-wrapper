@@ -50,7 +50,7 @@ mintTokenTrace = do
         mintParams = mintRequestParams name amt (mockWalletPaymentPubKeyHash clientW1)
     callEndpoint @"mintToken" h1 mintParams
     void $ Emulator.waitNSlots 6
-    callEndpoint @"mintToken" h1 (mintParams {clientPkh = mockWalletPaymentPubKeyHash clientW2})
+    callEndpoint @"mintToken" h1 (mintParams {tn = "anotherTraceTestToken", clientPkh = mockWalletPaymentPubKeyHash clientW2})
     void $ Emulator.waitNSlots 1
 
 

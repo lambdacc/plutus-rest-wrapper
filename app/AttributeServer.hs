@@ -44,14 +44,11 @@ import Servant
 import Servant.Types.SourceT (source)
 import System.Directory
 import System.Environment              (getArgs)
-import Text.Blaze
-import Text.Blaze.Html.Renderer.Utf8
 import Sample.Contracts.Types as ContractTypes
 import Sample.Contracts.Escrow as E
 import Sample.Contracts.TokenMinter as T
 import Sample.Runtime
 import Plutus.V1.Ledger.Api as PV1
-import qualified Data.ByteString.Lazy  as LBS
 import qualified Data.Aeson            as Aeson
 
 

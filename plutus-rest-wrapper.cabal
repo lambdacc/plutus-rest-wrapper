@@ -95,27 +95,6 @@ library
       utf8-string -any
     hs-source-dirs: src, app
 
-test-suite plutus-example-projects-test
-  import: lang
-  type: exitcode-stdio-1.0
-  main-is: Spec.hs
-  hs-source-dirs: examples/test
-  other-modules:
-    Spec.Game
-  build-depends:
-    plutus-tx -any,
-    plutus-tx-plugin,
-    plutus-contract -any,
-    plutus-pab -any,
-    plutus-ledger -any,
-    plutus-rest-wrapper -any
-  build-depends:
-    base >=4.9 && <5,
-    tasty -any,
-    tasty-hunit -any,
-    text -any,
-    tasty-hedgehog >=0.2.0.0
-
 executable plutus-rest-wrapper-pab
   import: lang
   main-is: pab.hs

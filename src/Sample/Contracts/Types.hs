@@ -21,7 +21,6 @@ import qualified Data.OpenApi.Schema as OpenApi (ToSchema)
 import Prelude (String)
 import qualified Prelude
 import PlutusTx.Prelude
-import PlutusTx.Builtins (BuiltinByteString)
 import PlutusTx.Builtins.Class (stringToBuiltinByteString)
 import Prelude (Show (..))
 
