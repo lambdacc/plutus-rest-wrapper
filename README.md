@@ -29,7 +29,7 @@ Include the attribute server into your plutus project by either using this proje
 
 At runtime, you need to run the `attribute-server` executable which exposes the RESTful endpoints.
 
-You can define new endpoints inside the AttributeServer module while wiring with your smart contracts. This is required so that you have the correct definitions aligning with your smart contract's validator and its parametrisation, so that it exposes the correct script address and cbor. Follow the example contracts (Escrow & TBD) given in this project to complete the integration for your contracts.  
+You can define new endpoints inside the AttributeServer module while wiring with your smart contracts. This is required so that you have the correct definitions aligning with your smart contract's validator and its parametrisation, so that it exposes the correct script address and cbor. Follow the example contracts (Escrow & TokenMinter) given in this project to complete the integration for your contracts.  
 
 ### Running the attribute server
 
