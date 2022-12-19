@@ -55,9 +55,9 @@ import qualified Data.Aeson            as Aeson
 type AttrServerAPI = "pkh" :> Capture "a" String :> Get '[JSON] PlutusPkh
                 :<|> "script-address" :> ReqBody '[JSON] EscrowReqBody :> Post '[JSON] ScriptAddr
                 :<|> "script-cbor" :> ReqBody '[JSON] EscrowReqBody :> Post '[JSON] ScriptCBOR
-                :<|> "policy-id" :> ReqBody '[JSON] TokenMinterReqBody :> Post '[JSON] MintPolicyId
                 :<|> "datum-hash" :> Capture "a" String :> Get '[JSON] ContractDatumHash
                 :<|> "datum" :> Capture "a" String :> Get '[JSON] ContractDatum
+                :<|> "policy-id" :> ReqBody '[JSON] TokenMinterReqBody :> Post '[JSON] MintPolicyId
 
 data PlutusPkh = PlutusPkh {pkh :: PaymentPubKeyHash}
                     deriving (Eq, Show, Generic, ToJSON)
@@ -110,9 +110,9 @@ attributeServer :: Server AttrServerAPI
 attributeServer = pkh
              :<|> scrAddresses
              :<|> scrCbor
-             :<|> mintingPolicyId
              :<|> datumHash
              :<|> datum
+             :<|> mintingPolicyId
               where
 
               pkh :: String -> Handler PlutusPkh
@@ -134,9 +134,6 @@ attributeServer = pkh
                               content <- liftIO $ LBS.readFile file
                               return $ fromJust (decode content)
 
-              mintingPolicyId :: TokenMinterReqBody -> Handler MintPolicyId
-              mintingPolicyId b = return $ MintPolicyId (show $ T.curSymbol $ T.toMintingPolicyParams (addrToPaymentPubKeyHash $ issuerAddress b) (tokenName b))
-
               datumHash :: String -> Handler ContractDatumHash
               datumHash a = return $ ContractDatumHash $ escrowDatumHash a
 
@@ -146,6 +143,9 @@ attributeServer = pkh
                                         Nothing -> Null
                                         Just v -> v
                         return $ ContractDatum response
+
+              mintingPolicyId :: TokenMinterReqBody -> Handler MintPolicyId
+              mintingPolicyId b = return $ MintPolicyId (show $ T.curSymbol $ T.toMintingPolicyParams (addrToPaymentPubKeyHash $ issuerAddress b) (tokenName b))
 
 toEscrowParams :: EscrowReqBody -> EscrowParams
 toEscrowParams b = ContractTypes.EscrowParams

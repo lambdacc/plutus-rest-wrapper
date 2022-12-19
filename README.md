@@ -34,6 +34,9 @@ At runtime, you need to run the `attribute-server` executable which exposes the 
 
 You can define new endpoints inside the AttributeServer module while wiring with your smart contracts. This is required so that you have the correct definitions aligning with your smart contract's validator and its parametrisation, so that it exposes the correct script address and cbor. Follow the example contracts (Escrow & TokenMinter) given in this project to complete the integration for your contracts.  
 
+**Video walkthrough:** 
+For a walkthrough on how to set up and use the tooling please watch this [video](https://youtu.be/6jOAhqwzyag).
+ 
 ### Running the attribute server
 
 1. Start nix-shell (from plutus-apps) and switch to this project dir
